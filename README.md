@@ -1,4 +1,3 @@
-﻿|- ![534359070-02a22911-a4e2-4ce0-a5f8-fe5592871dbd](https://github.com/user-attachments/assets/897edb4c-7ab7-4d36-863a-b1d36787b5ec) -|
 
 
 # OtzarLib
