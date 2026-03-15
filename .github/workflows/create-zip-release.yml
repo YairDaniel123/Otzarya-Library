@@ -1,10 +1,10 @@
-name: Auto-Generate Full ZIP Release
+name: Zero-Downtime Release
 
 on:
   push:
     branches:
-      - main  # התהליך ירוץ בכל פעם שתעלה שינויים לענף הראשי (Main)
-  workflow_dispatch: # שמרתי את זה כדי שתוכל עדיין להפעיל ידנית אם תרצה
+      - main
+  workflow_dispatch:
 
 jobs:
   package-and-release:
@@ -16,22 +16,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: true # מוודא שהקבצים הגדולים יורדים בשלמותם
+          lfs: true
+
+      - name: Get timestamp
+        id: vars
+        run: echo "sha_short=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: Zip files
-        run: zip -r Full-Repository-Download.zip . -x "*.git*" -x "*.github*"
+        run: zip -r Full-Library-${{ env.sha_short }}.zip . -x "*.git*" -x "*.github*"
 
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_ENV
-
-      - name: Create or Update Release
+      - name: Create New Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest-build # תג קבוע כדי לא להציף בעשרות Releases
-          name: Full Download (Auto-Updated)
-          files: Full-Repository-Download.zip
-          body: |
-            גרסה זו מתעדכנת אוטומטית בכל פעם שמועלה קוד חדש למאגר.
-            ה-ZIP מכיל את קבצי ה-PDF והקבצים הגדולים (150MB+) בגרסתם המלאה.
-          overwrite: true # מעדכן את הקובץ הקיים במקום ליצור Release חדש בכל פעם
+          tag_name: v${{ env.sha_short }}
+          name: Archive Update ${{ env.sha_short }}
+          files: Full-Library-${{ env.sha_short }}.zip
+          body: "גרסה אוטומטית מעודכנת."
+          make_latest: true # זה הופך את זה לגרסה הרשמית החדשה רק כשהכל מוכן
