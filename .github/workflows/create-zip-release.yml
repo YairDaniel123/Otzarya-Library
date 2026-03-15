@@ -1,4 +1,4 @@
-name: Zero-Downtime Release
+name: Zero-Downtime Release with Cleanup
 
 on:
   push:
@@ -16,20 +16,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: true
+          lfs: true # מוודא שהקבצים הגדולים יורדים בשלמותם
 
       - name: Get timestamp
         id: vars
         run: echo "sha_short=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
       - name: Zip files
-        run: zip -r Full-Library-${{ env.sha_short }}.zip . -x "*.git*" -x "*.github*"
+        run: zip -r Full-Repository-Download.zip . -x "*.git*" -x "*.github*"
 
       - name: Create New Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.sha_short }}
-          name: Archive Update ${{ env.sha_short }}
-          files: Full-Library-${{ env.sha_short }}.zip
-          body: "גרסה אוטומטית מעודכנת."
-          make_latest: true # זה הופך את זה לגרסה הרשמית החדשה רק כשהכל מוכן
+          tag_name: rel-${{ env.sha_short }}
+          name: "Library Update: ${{ env.sha_short }}"
+          files: Full-Repository-Download.zip
+          make_latest: true # הופך את זה לגרסה הרשמית רק כשהכל מוכן
+          body: "הורדה מלאה של המאגר. הקובץ עודכן אוטומטית."
+
+      - name: Cleanup Old Releases
+        uses: dev-drprasad/delete-older-releases@v0.3.0
+        with:
+          keep_latest: 2 # שומר את ה-2 האחרונים ומוחק את כל השאר
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
