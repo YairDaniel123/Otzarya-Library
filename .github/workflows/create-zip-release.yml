@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: true # מוודא שהקבצים הגדולים יורדים בשלמותם
+          lfs: true # מביא את הקבצים האמיתיים מ-LFS
 
       - name: Get timestamp
         id: vars
@@ -31,13 +31,18 @@ jobs:
           tag_name: rel-${{ env.sha_short }}
           name: "Library Update: ${{ env.sha_short }}"
           files: Full-Repository-Download.zip
-          make_latest: true # הופך את זה לגרסה הרשמית רק כשהכל מוכן
-          body: "הורדה מלאה של המאגר. הקובץ עודכן אוטומטית."
+          make_latest: true
+          body: |
+            גרסה זו מתעדכנת אוטומטית בכל פעם שמועלים ספרים חדשים למאגר.
+            ה-ZIP מכיל את קבצי ה-PDF והקבצים הגדולים (150MB+) בגרסתם המלאה.
+            
+            ---
+            *נוצר אוטומטית בתאריך: ${{ env.sha_short }}*
 
       - name: Cleanup Old Releases
         uses: dev-drprasad/delete-older-releases@v0.3.0
         with:
-          keep_latest: 2 # שומר את ה-2 האחרונים ומוחק את כל השאר
+          keep_latest: 2
           delete_tags: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
