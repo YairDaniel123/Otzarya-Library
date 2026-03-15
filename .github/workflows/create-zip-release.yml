@@ -1,0 +1,33 @@
+name: Generate Full ZIP with LFS
+
+on:
+  workflow_dispatch: # מאפשר הפעלה ידנית בלחיצת כפתור בממשק
+
+jobs:
+  package-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # מאפשר את יצירת קובץ ההורדה ב-Releases
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true # שורת הקסם: מורה לגיטהאב למשוך את הקבצים האמיתיים ולא את המצביעים של ה-LFS
+
+      - name: Zip files
+        run: zip -r Full-Repository-Download.zip . -x "*.git*" -x "*.github*" # אורז הכל לזיפ ומתעלם מתיקיות גיט פנימיות
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d_%H-%M')" >> $GITHUB_ENV # יוצר חותמת זמן לשם הגרסה
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: release-${{ env.date }}
+          name: Full Download - ${{ env.date }}
+          files: Full-Repository-Download.zip
+          body: |
+            קובץ ZIP זה נוצר באופן אוטומטי.
+            הוא מכיל את כל הקבצים המלאים, כולל קבצי ה-PDF והקבצים הגדולים (מעל 150MB) בגרסתם המקורית והתקינה.
